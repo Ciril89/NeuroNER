@@ -59,7 +59,10 @@ def load_parameters(parameters_filepath, arguments={}, verbose=True):
                   'use_character_lstm':True,
                   'use_crf':True,
                   'use_pretrained_model':False,
-                  'verbose':False}
+                  'verbose':False,
+                  # new parameters
+                  'num_layers': 2}
+
     # If a parameter file is specified, load it
     if len(parameters_filepath) > 0:
         conf_parameters = configparser.ConfigParser()
@@ -79,7 +82,9 @@ def load_parameters(parameters_filepath, arguments={}, verbose=True):
             parameters[k] = v
         # Ensure that each parameter is cast to the correct type
         if k in ['character_embedding_dimension','character_lstm_hidden_state_dimension','token_embedding_dimension',
-                 'token_lstm_hidden_state_dimension','patience','maximum_number_of_epochs','maximum_training_time','number_of_cpu_threads','number_of_gpus']:
+                 'token_lstm_hidden_state_dimension','patience',
+                 'maximum_number_of_epochs','maximum_training_time',
+                 'number_of_cpu_threads','number_of_gpus', 'num_layers']:
             parameters[k] = int(v)
         elif k in ['dropout_rate', 'learning_rate', 'gradient_clipping_value']:
             parameters[k] = float(v)
@@ -221,6 +226,9 @@ def parse_arguments(arguments=None):
     parser.add_argument('--use_crf', required=False, default=argument_default_value, help='')
     parser.add_argument('--use_pretrained_model', required=False, default=argument_default_value, help='')
     parser.add_argument('--verbose', required=False, default=argument_default_value, help='')
+
+    # new parameters
+    parser.add_argument('--num-layers', required=True, type=int)
 
     try:
         arguments = parser.parse_args(args=arguments)
