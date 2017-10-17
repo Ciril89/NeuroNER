@@ -90,7 +90,8 @@ class NeuroNER(object):
                       'use_pretrained_model':False,
                       'verbose':False,
                       # new arguments
-                      'num_layers':2}
+                      'num_layers':2,
+                      'use_deep_lstm': False}
         # If a parameter file is specified, load it
         if len(parameters_filepath) > 0:
             conf_parameters = configparser.ConfigParser()
@@ -254,7 +255,8 @@ class NeuroNER(object):
                  verbose=argument_default_value,
                  argument_default_value=argument_default_value,
                  # new arguments
-                 num_layers=argument_default_value):
+                 num_layers=argument_default_value,
+                 use_deep_lstm=argument_default_value):
         
         # Parse arguments
         arguments = dict( (k,str(v)) for k,v in locals().items() if k !='self')

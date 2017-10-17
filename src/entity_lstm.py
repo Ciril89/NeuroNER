@@ -6,9 +6,12 @@ import utils_nlp
 import os
 import pickle
 
+from deep_lstm import NewDeepLSTMCell
+
 
 def bidirectional_LSTM(input, hidden_state_dimension, initializer,
-                       num_layers, sequence_length=None, output_sequence=True):
+                       num_layers, sequence_length=None, output_sequence=True,
+                       use_deep_lstm=False):
 
     with tf.variable_scope("bidirectional_LSTM"):
         if sequence_length == None:
@@ -23,13 +26,31 @@ def bidirectional_LSTM(input, hidden_state_dimension, initializer,
         for direction in ["forward", "backward"]:
             with tf.variable_scope(direction):
                 # LSTM cell
-                cells = [tf.contrib.rnn.CoupledInputForgetGateLSTMCell(
-                    hidden_state_dimension, forget_bias=1.0, initializer=initializer, state_is_tuple=True)
-                    for _ in range(num_layers)]
-                if num_layers > 1:
-                    lstm_cell[direction] = tf.contrib.rnn.MultiRNNCell(cells)
+                if use_deep_lstm:
+                    print('Using a deep LSTM cell in the BiLSTM...')
+                    cells = NewDeepLSTMCell([hidden_state_dimension] *
+                                            num_layers,
+                                            state_is_tuple=True,
+                                            reuse=tf.get_variable_scope().reuse,
+                                            # keep_prob=config.keep_prob if
+                                            # is_training else 1.0,
+                                            dtype=tf.float32,
+                                            # drop_hidden_layers=config.drop_hidden_layers,
+                                            # use_semeniuta=config.use_semeniuta
+                    )
+                    # if is_training and config.keep_prob < 1:
+                    #     cell = tf.contrib.rnn.DropoutWrapper(
+                    #         cell, output_keep_prob=config.keep_prob,
+                    #         state_keep_prob=1.0,
+                    #         variational_recurrent=config.use_gal,
+                    #         dtype=tf.float32, input_size=size[0])
                 else:
-                    lstm_cell[direction] = cells[0]
+                    cells = [tf.contrib.rnn.CoupledInputForgetGateLSTMCell(
+                        hidden_state_dimension, forget_bias=1.0, initializer=initializer, state_is_tuple=True)
+                        for _ in range(num_layers)]
+                    cells = tf.contrib.rnn.MultiRNNCell(cells)\
+                        if num_layers > 1 else cells[0]
+                lstm_cell[direction] = cells
 
                 # initial state: http://stackoverflow.com/questions/38441589/tensorflow-rnn-initial-state
                 initial_cell_state = tf.get_variable("initial_cell_state", shape=[1, hidden_state_dimension], dtype=tf.float32, initializer=initializer)
@@ -145,7 +166,9 @@ class EntityLSTM(object):
         with tf.variable_scope('token_lstm') as vs:
             token_lstm_output = bidirectional_LSTM(token_lstm_input_drop_expanded, parameters['token_lstm_hidden_state_dimension'], initializer,
                                                    parameters['num_layers'],
-                                                   output_sequence=True)
+                                                   output_sequence=True,
+                                                   use_deep_lstm=parameters[
+                                                       'use_deep_lstm'])
             token_lstm_output_squeezed = tf.squeeze(token_lstm_output, axis=0)
             self.token_lstm_variables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope=vs.name)
 

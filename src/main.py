@@ -229,6 +229,8 @@ def parse_arguments(arguments=None):
 
     # new parameters
     parser.add_argument('--num-layers', required=True, type=int)
+    parser.add_argument('--use-deep-lstm', action='store_true',
+                        help='use the Deep LSTM cell')
 
     try:
         arguments = parser.parse_args(args=arguments)
@@ -239,6 +241,7 @@ def parse_arguments(arguments=None):
     arguments = vars(arguments) # http://stackoverflow.com/questions/16878315/what-is-the-right-way-to-treat-python-argparse-namespace-as-a-dictionary
     arguments['argument_default_value'] = argument_default_value
     return arguments
+
 
 def main(argv=sys.argv):
     ''' NeuroNER main method
