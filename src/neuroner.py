@@ -88,7 +88,10 @@ class NeuroNER(object):
                       'use_character_lstm':True,
                       'use_crf':True,
                       'use_pretrained_model':False,
-                      'verbose':False}
+                      'verbose':False,
+                      # new arguments
+                      'num_layers':2,
+                      'use_deep_lstm': False}
         # If a parameter file is specified, load it
         if len(parameters_filepath) > 0:
             conf_parameters = configparser.ConfigParser()
@@ -108,7 +111,9 @@ class NeuroNER(object):
                 parameters[k] = v
             # Ensure that each parameter is cast to the correct type
             if k in ['character_embedding_dimension','character_lstm_hidden_state_dimension','token_embedding_dimension',
-                     'token_lstm_hidden_state_dimension','patience','maximum_number_of_epochs','maximum_training_time','number_of_cpu_threads','number_of_gpus']:
+                     'token_lstm_hidden_state_dimension','patience',
+                     'maximum_number_of_epochs','maximum_training_time','number_of_cpu_threads','number_of_gpus',
+                     'num_layers']:
                 parameters[k] = int(v)
             elif k in ['dropout_rate', 'learning_rate', 'gradient_clipping_value']:
                 parameters[k] = float(v)
@@ -248,7 +253,10 @@ class NeuroNER(object):
                  use_crf=argument_default_value,
                  use_pretrained_model=argument_default_value,
                  verbose=argument_default_value,
-                 argument_default_value=argument_default_value):
+                 argument_default_value=argument_default_value,
+                 # new arguments
+                 num_layers=argument_default_value,
+                 use_deep_lstm=argument_default_value):
         
         # Parse arguments
         arguments = dict( (k,str(v)) for k,v in locals().items() if k !='self')
