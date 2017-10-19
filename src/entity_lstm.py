@@ -60,7 +60,7 @@ def bidirectional_LSTM(input, hidden_state_dimension, initializer,
 
                 initial_states = [tf.contrib.rnn.LSTMStateTuple(
                     c_states, h_states) for _ in range(num_layers)]
-                if num_layers > 1:
+                if num_layers > 1 and not use_deep_lstm:
                     initial_state[direction] = tuple(initial_states)
                 else:
                     initial_state[direction] = initial_states[0]
